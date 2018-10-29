@@ -52,9 +52,9 @@ This endpoint is useful for if you need more than one rate.
 ### Get all supported exchange rates
 
 - #### Endpoint
-    `https://host.com/all`
+    `https://host.com/list`
     #### Example:
-    `https://api.get-spark.com/all`
+    `https://api.get-spark.com/list`
 
 - #### Response
     ```js

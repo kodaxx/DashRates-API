@@ -122,44 +122,23 @@ app.get('/btcaverage', async function(req, res) {
   res.json(price)
 })
 
-// get all rates
-app.get('/all', async function(req, res) {
-  const currencies =
-  ["AED","AFN","ALL","AMD","ANG","AOA","ARS","AUD","AWG","AZN","BAM","BBD","BDT","BGN","BHD","BIF","BMD","BND",
-  "BOB","BRL","BSD","BTN","BWP","BYN","BZD","CAD","CDF","CHF","CLF","CLP","CNH","CNY","COP","CRC","CUC","CUP",
-  "CVE","CZK","DJF","DKK","DOP","DZD","EGP","ERN","ETB","EUR","FJD","FKP","GBP","GEL","GGP","GHS","GIP","GMD",
-  "GNF","GTQ","GYD","HKD","HNL","HRK","HTG","HUF","IDR","ILS","IMP","INR","IQD","IRR","ISK","JEP","JMD","JOD",
-  "JPY","KES","KGS","KHR","KMF","KPW","KRW","KWD","KYD","KZT","LAK","LBP","LKR","LRD","LSL","LYD","MAD","MDL",
-  "MGA","MKD","MMK","MNT","MOP","MRO","MUR","MVR","MWK","MXN","MYR","MZN","NAD","NGN","NIO","NOK","NPR","NZD",
-  "OMR","PAB","PEN","PGK","PHP","PKR","PLN","PYG","QAR","RON","RSD","RUB","RWF","SAR","SBD","SCR","SDG","SEK",
-  "SGD","SHP","SLL","SOS","SRD","SSP","STD","SVC","SYP","SZL","THB","TJS","TMT","TND","TOP","TRY","TTD","TWD",
-  "TZS","UAH","UGX","USD","UYU","UZS","VES","VND","VUV","WST","XAF","XAG","XAU","XCD","XDR","XOF","XPD","XPF",
-  "XPT","YER","ZAR","ZMW","ZWL"]
-  console.log('getting all rates...')
-  try {
-    // get current average BTC/FIAT and BTC/DASH exchange rate
-    const rates = await getBitcoinAverage(bitcoinAverageUrl, currencies)
-    const dash = await getDashBtc(dashBtcUrl)
-    // 'rates' is an object containing requested fiat rates (ex. USD: 6500)
-    // multiply each value in the object by the current BTC/DASH rate
-    for (var key in rates) {
-      if (rates.hasOwnProperty(key)) {
-        rates[key] *= dash
-      }
-    }
-    // return the rates
-    res.json(rates)
-  } catch (e) {
-    // this will eventually be handled by error handling middleware
-    res.send(`error: ${e}`)
-    console.log(e)
-  }
-})
-
-// get specific rates
+// get rates
 app.get('/*', async function(req, res) {
   const params = req.params[0].split('/')
-  const currencies = params.map(currency => currency.toUpperCase())
+  let currencies = params.map(currency => currency.toUpperCase())
+  // if we want all rates, we simply pass the 'list' parameter
+  if (currencies[0] === "LIST") {
+    currencies = ["AED","AFN","ALL","AMD","ANG","AOA","ARS","AUD","AWG","AZN","BAM","BBD","BDT","BGN","BHD","BIF",
+      "BMD","BND","BOB","BRL","BSD","BTN","BWP","BYN","BZD","CAD","CDF","CHF","CLF","CLP","CNH","CNY","COP","CRC",
+      "CUC","CUP","CVE","CZK","DJF","DKK","DOP","DZD","EGP","ERN","ETB","EUR","FJD","FKP","GBP","GEL","GGP","GHS",
+      "GIP","GMD","GNF","GTQ","GYD","HKD","HNL","HRK","HTG","HUF","IDR","ILS","IMP","INR","IQD","IRR","ISK","JEP",
+      "JMD","JOD","JPY","KES","KGS","KHR","KMF","KPW","KRW","KWD","KYD","KZT","LAK","LBP","LKR","LRD","LSL","LYD",
+      "MAD","MDL","MGA","MKD","MMK","MNT","MOP","MRO","MUR","MVR","MWK","MXN","MYR","MZN","NAD","NGN","NIO","NOK",
+      "NPR","NZD","OMR","PAB","PEN","PGK","PHP","PKR","PLN","PYG","QAR","RON","RSD","RUB","RWF","SAR","SBD","SCR",
+      "SDG","SEK","SGD","SHP","SLL","SOS","SRD","SSP","STD","SVC","SYP","SZL","THB","TJS","TMT","TND","TOP","TRY",
+      "TTD","TWD","TZS","UAH","UGX","USD","UYU","UZS","VES","VND","VUV","WST","XAF","XAG","XAU","XCD","XDR","XOF",
+      "XPD","XPF","XPT","YER","ZAR","ZMW","ZWL"]
+  }
   console.log(`get rate: ${currencies}`)
   try {
     // get current average BTC/FIAT and BTC/DASH exchange rate
@@ -173,7 +152,7 @@ app.get('/*', async function(req, res) {
           rates[key] *= poloniex || dash
       }
     }
-    // return the rates
+    // return the rates object
     res.json(rates)
   } catch (e) {
     // this will eventually be handled by error handling middleware
@@ -185,6 +164,5 @@ app.get('/*', async function(req, res) {
 // set server
 const server = app.listen(8081, function() {
   const port = server.address().port;
-  console.log(`DashRates API v0.0.1 running on port ${port}`)
-
+  console.log(`DashRates API v0.0.2 running on port ${port}`)
 })
