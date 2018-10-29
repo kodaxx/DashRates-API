@@ -1,0 +1,19 @@
+{
+  "name": "dashrates-api",
+  "version": "0.0.1",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "coinmarketcap-api": "^1.0.3",
+    "express": "^4.16.3",
+    "nodemon": "^1.18.5",
+    "npm": "^6.4.1"
+  }
+}
