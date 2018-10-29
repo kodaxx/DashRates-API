@@ -3,7 +3,7 @@
 ## Installation
 
 Clone repo
-`git clone [url] dashrates-api`
+`git clone https://github.com/kodaxx/DashRates-API.git dashrates-api`
 
 Change into directory
 `cd dashrates-api`
