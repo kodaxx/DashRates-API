@@ -10,15 +10,14 @@ const dashBtcUrl = 'https://apiv2.bitcoinaverage.com/indices/crypto/ticker/DASHB
 const poloniexDashUrl = 'https://poloniex.com/public?command=returnTradeHistory&currencyPair=BTC_DASH'
 const cryptoCompareUrl = 'https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=VES'
 
-// get bitcoin's average price against various fiat currencies
+// get bitcoin's average price against ves
 function getVes(url) {
   let output
   return new Promise(resolve => {
     axios.get(url)
       .then(result => {
-        // for each currency passed into this function, we add a key/value to output (ex. USD: 6500.12345)
+        // our output will equal the average since CryptoCompare returns the correct average
         output = result.data.VES
-        // resolve an object containing all requested currencies
         resolve(output)
       })
       .catch(error => {
