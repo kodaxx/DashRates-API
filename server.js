@@ -3,6 +3,7 @@ const app = express()
 const axios = require('axios')
 const coinmarketcap = require('coinmarketcap-api')
 const cmc = new coinmarketcap()
+const cache = require('./cache')
 
 // set URLs
 const bitcoinAverageUrl = 'https://apiv2.bitcoinaverage.com/indices/global/ticker/short?crypto=BTC'
@@ -12,82 +13,150 @@ const cryptoCompareUrl = 'https://min-api.cryptocompare.com/data/price?fsym=BTC&
 
 // get bitcoin's average price against ves
 function getVes(url) {
+  const cacheRef = '_cachedVES'
   let output
+
   return new Promise(resolve => {
-    axios.get(url)
-      .then(result => {
-        // our output will equal the average since CryptoCompare returns the correct average
-        output = result.data.VES
-        resolve(output)
-      })
-      .catch(error => {
-        console.log(`Error: ${error}`)
-        resolve(error)
-      })
+    cache.get(cacheRef, function(error, data) {
+      if (error) throw error
+
+      if (!!data) {
+        resolve(JSON.parse(data))
+      }
+
+      else {
+        axios.get(url)
+        .then(result => {
+          // our output will equal the average since CryptoCompare returns the correct average
+          output = result.data.VES
+          
+          // Set the cache for this response and save for 30 seconds
+          cache.setex(cacheRef, 30, JSON.stringify(output));
+          
+          resolve(output)
+        })
+        .catch(error => {
+          console.log(`Error: ${error}`)
+          resolve(error)
+        })
+
+      }
+    })
+
   })
 }
 
 // get bitcoin's average price against various fiat currencies
 function getBitcoinAverage(url, [...currencies]) {
   const output = {}
+  const cacheRef = '_cachedBitcoinAverageFor_'+currencies
+
   return new Promise(resolve => {
-    axios.get(url)
-      .then(async result => {
-        // for each currency passed into this function, we add a key/value to output (ex. USD: 6500.12345)
-        for (var currency of currencies) {
-          // we check if the currency is 'VES', since the rates given on BitcoinAverage are incorrect
-          if (currency === 'VES') {
-            // instead we get rates from CryptoCompare
-            output[currency] = await getVes(cryptoCompareUrl)
-          } else {
-            // otherwise we use the "last" price from bitcoinaverage to give us the most recent exchange rate
-            output[currency] = result.data[`BTC${currency}`].last
+    cache.get(cacheRef, function(error, data) {
+      if (error) throw error
+      
+      if (!!data) {
+        resolve(JSON.parse(data))
+      }
+
+      else {
+        axios.get(url)
+        .then(async result => {
+          // for each currency passed into this function, we add a key/value to output (ex. USD: 6500.12345)
+          for (var currency of currencies) {
+            // we check if the currency is 'VES', since the rates given on BitcoinAverage are incorrect
+            if (currency === 'VES') {
+              // instead we get rates from CryptoCompare
+              output[currency] = await getVes(cryptoCompareUrl)
+            } else {
+              // otherwise we use the "last" price from bitcoinaverage to give us the most recent exchange rate
+              output[currency] = result.data[`BTC${currency}`].last
+            }
           }
-        }
-        // resolve an object containing all requested currencies
-        resolve(output)
-      })
-      .catch(error => {
-        console.log(`Error: ${error}`)
-        resolve(error)
-      })
+          // Set the cache for this response and save for 30 seconds
+          cache.setex(cacheRef, 30, JSON.stringify(output));
+
+          // resolve an object containing all requested currencies
+          resolve(output)
+        })
+        .catch(error => {
+          console.log(`Error: ${error}`)
+          resolve(error)
+        })
+  
+      }
+    })
   })
 }
 
 // get the current DASH trading price from Poloniex
 function getPoloniexDash(url) {
+  const cacheRef = '_cachedPoloniexDash'
+
   return new Promise(resolve => {
-    axios.get(url)
-      .then(result => {
-        let total = 0
-        let amount = 0
-        // loop through the results and get the total BTC traded, and the amount of DASH traded
-        for (var i = 0; i < result.data.length; i++) {
-          total += parseFloat(result.data[i].total)
-          amount += parseFloat(result.data[i].amount)
-        }
-        // get the average price paid for the last 200 trades
-        let average = total / amount
-        resolve(average)
-      })
-      .catch(error => {
-        console.log(`Error: ${error}`)
-        resolve(false)
-      })
+    cache.get(cacheRef, function(error,data) {
+      if (error) throw error
+
+      if (!!data) {
+        resolve(JSON.parse(data))
+        console.log('Grabbed _cachedPoloniexDash')
+      }
+      else {
+        axios.get(url)
+        .then(result => {
+          let total = 0
+          let amount = 0
+          // loop through the results and get the total BTC traded, and the amount of DASH traded
+          for (var i = 0; i < result.data.length; i++) {
+            total += parseFloat(result.data[i].total)
+            amount += parseFloat(result.data[i].amount)
+          }
+          // get the average price paid for the last 200 trades
+          let average = total / amount
+          
+          // Set the cache for this response and save for 30 seconds
+          cache.setex(cacheRef, 30, JSON.stringify(average));
+
+          resolve(average)
+        })
+        .catch(error => {
+          console.log(`Error: ${error}`)
+          resolve(false)
+        })
+      }
+    })
+
   })
 }
 
 // get the current BTC/DASH price - we grab the "last" price from bitcoinaverage to get the most recent exchange rate
 function getDashBtc(url) {
+  const cacheRef = '_cachedDashBTC'
+  
   return new Promise(resolve => {
-    axios.get(url)
-      .then(result => {
-        resolve(result.data.last)
-      })
-      .catch(error => {
-        console.log(`Error: ${error}`)
-        resolve(error)
-      })
+    cache.get(cacheRef, function(error,data) {
+      if (error) throw error
+
+      if (!!data) {
+        resolve(JSON.parse(data))
+        console.log('Grabbed _cachedDashBTC')
+      }
+      else{
+        axios.get(url)
+        .then(result => {
+          const last = result.data.last
+
+          // Set the cache for this response and save for 30 seconds
+          cache.setex(cacheRef, 30, JSON.stringify(last));
+          resolve(last)
+        })
+        .catch(error => {
+          console.log(`Error: ${error}`)
+          resolve(error)
+        })
+      }
+    })
+
   })
 }
 
