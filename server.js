@@ -10,6 +10,7 @@ const bitcoinAverageUrl = 'https://apiv2.bitcoinaverage.com/indices/global/ticke
 const dashBtcUrl = 'https://apiv2.bitcoinaverage.com/indices/crypto/ticker/DASHBTC'
 const poloniexDashUrl = 'https://poloniex.com/public?command=returnTradeHistory&currencyPair=BTC_DASH'
 const cryptoCompareUrl = 'https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=VES'
+const cryptoCompareAvgUrl = 'https://min-api.cryptocompare.com/data/generateAvg?fsym=DASH&tsym=BTC&e=Binance,Kraken,Poloniex,Bitfinex'
 
 // get bitcoin's average price against ves
 function getVes(url) {
@@ -29,10 +30,10 @@ function getVes(url) {
         .then(result => {
           // our output will equal the average since CryptoCompare returns the correct average
           output = result.data.VES
-          
+
           // Set the cache for this response and save for 30 seconds
           cache.setex(cacheRef, 30, JSON.stringify(output));
-          
+
           resolve(output)
         })
         .catch(error => {
@@ -54,7 +55,7 @@ function getBitcoinAverage(url, [...currencies]) {
   return new Promise(resolve => {
     cache.get(cacheRef, function(error, data) {
       if (error) throw error
-      
+
       if (!!data) {
         resolve(JSON.parse(data))
       }
@@ -83,7 +84,43 @@ function getBitcoinAverage(url, [...currencies]) {
           console.log(`Error: ${error}`)
           resolve(error)
         })
-  
+
+      }
+    })
+  })
+}
+
+// get dash's average trading price from various exchanges
+function getCryptoCompareAvg(url) {
+  let output = {}
+  const cacheRef = '_cachedCryptoCompareAvg'
+
+  return new Promise(resolve => {
+    cache.get(cacheRef, function(error, data) {
+      if (error) throw error
+
+      if (!!data) {
+        resolve(JSON.parse(data))
+        console.log('Grabbed _cachedCryptoCompareAvg')
+      }
+
+      else {
+        axios.get(url)
+        .then(async result => {
+          // the output should equal the average price (ex. 0.02528)
+          output = parseFloat(result.data.RAW.PRICE)
+
+          // Set the cache for this response and save for 30 seconds
+          cache.setex(cacheRef, 30, JSON.stringify(output))
+
+          // resolve an object containing all requested currencies
+          resolve(output)
+        })
+        .catch(error => {
+          console.log(`Error: ${error}`)
+          resolve(error)
+        })
+
       }
     })
   })
@@ -113,9 +150,9 @@ function getPoloniexDash(url) {
           }
           // get the average price paid for the last 200 trades
           let average = total / amount
-          
+
           // Set the cache for this response and save for 30 seconds
-          cache.setex(cacheRef, 30, JSON.stringify(average));
+          cache.setex(cacheRef, 30, JSON.stringify(average))
 
           resolve(average)
         })
@@ -132,7 +169,7 @@ function getPoloniexDash(url) {
 // get the current BTC/DASH price - we grab the "last" price from bitcoinaverage to get the most recent exchange rate
 function getDashBtc(url) {
   const cacheRef = '_cachedDashBTC'
-  
+
   return new Promise(resolve => {
     cache.get(cacheRef, function(error,data) {
       if (error) throw error
@@ -147,7 +184,7 @@ function getDashBtc(url) {
           const last = result.data.last
 
           // Set the cache for this response and save for 30 seconds
-          cache.setex(cacheRef, 30, JSON.stringify(last));
+          cache.setex(cacheRef, 30, JSON.stringify(last))
           resolve(last)
         })
         .catch(error => {
@@ -203,6 +240,12 @@ app.get('/cmc/:token', function(req, res) {
   }).catch(console.error)
 })
 
+// get CryptoCompare average trading price
+app.get('/avg', async function(req, res) {
+  let price = await getCryptoCompareAvg(cryptoCompareAvgUrl)
+  res.json(price)
+})
+
 // get Poloniex trading price
 app.get('/poloniex', async function(req, res) {
   let price = await getPoloniexDash(poloniexDashUrl)
@@ -238,13 +281,15 @@ app.get('/*', async function(req, res) {
   try {
     // get current average BTC/FIAT and BTC/DASH exchange rate
     const rates = await getBitcoinAverage(bitcoinAverageUrl, currencies)
-    const poloniex = await getPoloniexDash(poloniexDashUrl)
+    const avg = await getCryptoCompareAvg(cryptoCompareAvgUrl)
+    // const poloniex = await getPoloniexDash(poloniexDashUrl)
     const dash = await getDashBtc(dashBtcUrl)
     // 'rates' is an object containing requested fiat rates (ex. USD: 6500)
     // multiply each value in the object by the current BTC/DASH rate
     for (var key in rates) {
       if (rates.hasOwnProperty(key)) {
-        rates[key] *= poloniex || dash
+        // rates[key] *= poloniex
+        rates[key] *= avg || dash
       }
     }
     // return the rates object
@@ -259,5 +304,5 @@ app.get('/*', async function(req, res) {
 // set server
 const server = app.listen(8081, function() {
   const port = server.address().port;
-  console.log(`DashRates API v0.1.2 running on port ${port}`)
+  console.log(`DashRates API v0.1.3 running on port ${port}`)
 })
