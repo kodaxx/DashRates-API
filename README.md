@@ -75,21 +75,18 @@ This endpoint returns an object with every supported currency, in alphabetical o
 
 There are currently 167 supported exchange rates.
 
-### Get CoinMarketCap prices
+### Get average DASH trading price
 
 - #### Endpoint
-    `https://host.com/cmc/dash`
+    `https://host.com/avg`
     #### Example:
-    `https://api.get-spark.com/cmc/dash`
+    `https://api.get-spark.com/avg`
 
 - #### Response
     ```js
-    {
-      "USD": "155.805529902",
-      "BTC": "0.02417587"
-    }
+    0.02474
     ```
-Theoretically, you can get any USD or BTC price from coinmarketcap with this endpoint.
+This is the average DASH price across Binance, Kraken, Poloniex, and Bitfinex
 
 ### Get BitcoinAverage DASH trading price
 
