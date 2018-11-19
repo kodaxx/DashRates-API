@@ -12,6 +12,19 @@ const averageUrl = 'https://min-api.cryptocompare.com/data/generateAvg?fsym=DASH
 // prettify json
 app.set('json spaces', 2)
 
+// setup cron job to pre-warm cache for common entries
+const CronJob = require('cron').CronJob;
+
+new CronJob('0 */1 * * * *', async function() {
+  console.log(await providers.BTCBitcoinAverage(btc2fiatUrl, vesUrl, 'USD'));
+  console.log(await providers.DASHPoloniex(poloniexDashUrl));
+  console.log(await providers.DASHCryptoCompareAvg(averageUrl));
+  console.log(await providers.BitcoinAverageDashBtc(dash2btcUrl));
+
+  console.log('Cache Refreshed');
+
+}, null, true, 'America/Los_Angeles', null, true);
+
 // ignore favicon
 app.use(function(req, res, next) {
   if (req.originalUrl === '/favicon.ico') {
