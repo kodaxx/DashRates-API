@@ -26,8 +26,8 @@ exports.BTCBitcoinAverage = function(url, vesUrl, [...currencies]) {
                 output[currency] = result.data[`BTC${currency}`].last
               }
             }
-            // set the cache for this response and save for 30 seconds
-            cache.setex(cacheRef, 30, JSON.stringify(output));
+            // set the cache for this response and save for 60 seconds
+            cache.setex(cacheRef, 60, JSON.stringify(output));
             // resolve an object containing all requested currencies
             resolve(output)
           })
@@ -86,8 +86,8 @@ exports.DASHCryptoCompareAvg = function(url) {
           .then(async result => {
             // the output should equal the average price (ex. 0.02528)
             output = parseFloat(result.data.RAW.PRICE)
-            // set the cache for this response and save for 30 seconds
-            cache.setex(cacheRef, 30, JSON.stringify(output))
+            // set the cache for this response and save for 60 seconds
+            cache.setex(cacheRef, 60, JSON.stringify(output))
             // resolve an object containing all requested currencies
             resolve(output)
           })
@@ -123,8 +123,8 @@ exports.DASHPoloniex = function(url) {
             }
             // get the average price paid for the last 200 trades
             let average = total / amount
-            // set the cache for this response and save for 30 seconds
-            cache.setex(cacheRef, 30, JSON.stringify(average))
+            // set the cache for this response and save for 60 seconds
+            cache.setex(cacheRef, 60, JSON.stringify(average))
             resolve(average)
           })
           .catch(error => {
@@ -151,8 +151,8 @@ exports.BitcoinAverageDashBtc = function (url) {
         axios.get(url)
           .then(result => {
             const last = result.data.last
-            // set the cache for this response and save for 30 seconds
-            cache.setex(cacheRef, 30, JSON.stringify(last))
+            // set the cache for this response and save for 60 seconds
+            cache.setex(cacheRef, 60, JSON.stringify(last))
             resolve(last)
           })
           .catch(error => {

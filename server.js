@@ -1,6 +1,5 @@
 const express = require('express')
 const app = express()
-const cache = require('./cache')
 const providers = require('./providers')
 
 // set URLs
@@ -12,6 +11,19 @@ const averageUrl = 'https://min-api.cryptocompare.com/data/generateAvg?fsym=DASH
 
 // prettify json
 app.set('json spaces', 2)
+
+// setup cron job to pre-warm cache for common entries
+const CronJob = require('cron').CronJob;
+
+new CronJob('0 */1 * * * *', async function() {
+  console.log(await providers.BTCBitcoinAverage(btc2fiatUrl, vesUrl, 'USD'));
+  console.log(await providers.DASHPoloniex(poloniexDashUrl));
+  console.log(await providers.DASHCryptoCompareAvg(averageUrl));
+  console.log(await providers.BitcoinAverageDashBtc(dash2btcUrl));
+
+  console.log('Cache Refreshed');
+
+}, null, true, 'America/Los_Angeles', null, true);
 
 // ignore favicon
 app.use(function(req, res, next) {
@@ -36,6 +48,10 @@ app.use('/static', express.static(__dirname + '/public'))
 // docs at '/'
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/public/docs/index.html')
+})
+
+app.get('/loaderio-4d63e500c07b5d7d166e20c374e6534d', function(req, res) {
+  res.sendFile(__dirname + '/public/loaderio-4d63e500c07b5d7d166e20c374e6534d.txt')
 })
 
 // get CryptoCompare average trading price
@@ -100,7 +116,6 @@ app.get('/*', async function(req, res) {
 })
 
 // set server
-const server = app.listen(8081, function() {
-  const port = server.address().port;
-  console.log(`DashRates API v0.2.3 running on port ${port}`)
-})
+const port = process.env.PORT || 3000;
+app.listen(port);
+console.log(`DashRates API v0.2.4 running on port http://localhost:${port}`);
