@@ -1,6 +1,6 @@
 {
   "name": "dashrates-api",
-  "version": "0.1.2",
+  "version": "0.2.3",
   "description": "",
   "main": "server.js",
   "scripts": {
@@ -11,7 +11,6 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.18.0",
-    "coinmarketcap-api": "^1.0.3",
     "express": "^4.16.3",
     "nodemon": "^1.18.5",
     "npm": "^6.4.1",

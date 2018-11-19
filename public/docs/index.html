@@ -72,54 +72,51 @@
 </ul>
 <p>This endpoint returns an object with every supported currency, in alphabetical order.</p>
 <p>There are currently 167 supported exchange rates.</p>
-<h3><a id="Get_CoinMarketCap_prices_77"></a>Get CoinMarketCap prices</h3>
+<h3><a id="Get_average_DASH_trading_price_77"></a>Get average DASH trading price</h3>
 <ul>
 <li>
 <h4><a id="Endpoint_79"></a>Endpoint</h4>
-<p><code>https://host.com/cmc/dash</code></p>
+<p><code>https://host.com/avg</code></p>
 <h4><a id="Example_81"></a>Example:</h4>
-<p><code>https://api.get-spark.com/cmc/dash</code></p>
+<p><code>https://api.get-spark.com/avg</code></p>
 </li>
 <li>
 <h4><a id="Response_84"></a>Response</h4>
-<pre><code class="language-js">{
-  <span class="hljs-string">"USD"</span>: <span class="hljs-string">"155.805529902"</span>,
-  <span class="hljs-string">"BTC"</span>: <span class="hljs-string">"0.02417587"</span>
-}
+<pre><code class="language-js"><span class="hljs-number">0.02474</span>
 </code></pre>
 </li>
 </ul>
-<p>Theoretically, you can get any USD or BTC price from coinmarketcap with this endpoint.</p>
-<h3><a id="Get_BitcoinAverage_DASH_trading_price_93"></a>Get BitcoinAverage DASH trading price</h3>
+<p>This is the average DASH price across Binance, Kraken, Poloniex, and Bitfinex</p>
+<h3><a id="Get_BitcoinAverage_DASH_trading_price_90"></a>Get BitcoinAverage DASH trading price</h3>
 <ul>
 <li>
-<h4><a id="Endpoint_95"></a>Endpoint</h4>
+<h4><a id="Endpoint_92"></a>Endpoint</h4>
 <p><code>https://host.com/btcaverage</code></p>
-<h4><a id="Example_97"></a>Example:</h4>
+<h4><a id="Example_94"></a>Example:</h4>
 <p><code>https://api.get-spark.com/btcaverage</code></p>
 </li>
 <li>
-<h4><a id="Response_100"></a>Response</h4>
+<h4><a id="Response_97"></a>Response</h4>
 <pre><code class="language-js"><span class="hljs-number">0.02412598</span>
 </code></pre>
 </li>
 </ul>
-<h3><a id="Get_Poloniex_DASH_trading_price_105"></a>Get Poloniex DASH trading price</h3>
+<h3><a id="Get_Poloniex_DASH_trading_price_102"></a>Get Poloniex DASH trading price</h3>
 <ul>
 <li>
-<h4><a id="Endpoint_107"></a>Endpoint</h4>
+<h4><a id="Endpoint_104"></a>Endpoint</h4>
 <p><code>https://host.com/poloniex</code></p>
-<h4><a id="Example_109"></a>Example:</h4>
+<h4><a id="Example_106"></a>Example:</h4>
 <p><code>https://api.get-spark.com/poloniex</code></p>
 </li>
 <li>
-<h4><a id="Response_112"></a>Response</h4>
+<h4><a id="Response_109"></a>Response</h4>
 <pre><code class="language-js"><span class="hljs-number">0.024089169894995932</span>
 </code></pre>
 </li>
 </ul>
 <p>This is an average of the price paid for the last 200 trades on Poloniex</p>
-<h3><a id="Supported_Currencies_118"></a>Supported Currencies</h3>
+<h3><a id="Supported_Currencies_115"></a>Supported Currencies</h3>
 <pre><code class="language-js">AED, AFN, ALL, AMD, ANG, AOA, ARS, AUD, AWG, AZN, BAM, BBD, BDT, BGN, BHD, BIF, BMD, BND, BOB, BRL, BSD, BTN, BWP, BYN, BZD, CAD, CDF, CHF, CLF, CLP, CNH, CNY, COP, CRC, CUC, CUP, CVE, CZK, DJF, DKK, DOP, DZD, EGP, ERN, ETB, EUR, FJD, FKP, GBP, GEL, GGP, GHS, GIP, GMD, GNF, GTQ, GYD, HKD, HNL, HRK, HTG, HUF, IDR, ILS, IMP, INR, IQD, IRR, ISK, JEP, JMD, JOD, JPY, KES, KGS, KHR, KMF, KPW, KRW, KWD, KYD, KZT, LAK, LBP, LKR, LRD, LSL, LYD, MAD, MDL, MGA, MKD, MMK, MNT, MOP, MRO, MUR, MVR, MWK, MXN, MYR, MZN, NAD, NGN, NIO, NOK, NPR, NZD, OMR, PAB, PEN, PGK, PHP, PKR, PLN, PYG, QAR, RON, RSD, RUB, RWF, SAR, SBD, SCR, SDG, SEK, SGD, SHP, SLL, SOS, SRD, SSP, STD, SVC, SYP, SZL, THB, TJS, TMT, TND, TOP, TRY, TTD, TWD, TZS, UAH, UGX, USD, UYU, UZS, VES, VND, VUV, WST, XAF, XAG, XAU, XCD, XDR, XOF, XPD, XPF, XPT, YER, ZAR, ZMW, ZWL
 </code></pre>
 
