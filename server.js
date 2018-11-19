@@ -100,7 +100,6 @@ app.get('/*', async function(req, res) {
 })
 
 // set server
-const server = app.listen(8081, function() {
-  const port = server.address().port;
-  console.log(`DashRates API v0.2.3 running on port ${port}`)
-})
+const port = process.env.PORT || 3000;
+app.listen(port);
+console.log(`DashRates API v0.2.3 running on port http://localhost:${port}`);
