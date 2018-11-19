@@ -1,6 +1,5 @@
 const express = require('express')
 const app = express()
-const cache = require('./cache')
 const providers = require('./providers')
 
 // set URLs
