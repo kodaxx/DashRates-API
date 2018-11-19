@@ -50,9 +50,9 @@ app.get('/', function(req, res) {
   res.sendFile(__dirname + '/public/docs/index.html')
 })
 
-app.get'/loaderio-4d63e500c07b5d7d166e20c374e6534d', function(req, res) {
+app.get('/loaderio-4d63e500c07b5d7d166e20c374e6534d', function(req, res) {
   res.sendFile(__dirname + '/public/loaderio-4d63e500c07b5d7d166e20c374e6534d.txt')
-}
+})
 
 // get CryptoCompare average trading price
 app.get('/avg', async function(req, res) {
