@@ -75,6 +75,14 @@ app.get('/btcaverage', async function(req, res) {
   res.json(price)
 })
 
+app.get('/invoice', async function(req, res) {
+  // http://localhost:3000/invoice?addr=XguWWTJUciSsADfHBqHynqF6vwyM2rWib4&amount=22500
+  const address = req.query.addr
+  const amount = parseInt(req.query.amount)
+
+  res.json(await providers.invoice(address, amount))
+})
+
 // get rates
 app.get('/*', async function(req, res) {
   const params = req.params[0].split('/')

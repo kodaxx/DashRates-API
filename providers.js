@@ -163,3 +163,32 @@ exports.BitcoinAverageDashBtc = function (url) {
     })
   })
 }
+
+// get invoice number from CoinText
+exports.invoice = function(address, amount) {
+  return new Promise(resolve => {
+    const data = {
+      'address': address,
+      'amount': amount,
+      'network': 'dash',
+      'api_key': process.env.API_KEY
+    }
+
+    const headers = {
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    }
+
+    axios.post('https://pos-api.cointext.io/create_invoice/', data, headers)
+      .then((res) => {
+        console.log(res.data)
+        resolve(res.data.paymentId)
+      })
+      .catch((err) => {
+        console.log(error)
+        resolve(error)
+      })
+  })
+}
