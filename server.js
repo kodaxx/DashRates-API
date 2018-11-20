@@ -16,10 +16,12 @@ app.set('json spaces', 2)
 const CronJob = require('cron').CronJob;
 
 new CronJob('0 */1 * * * *', async function() {
-  console.log(await providers.BTCBitcoinAverage(btc2fiatUrl, vesUrl, 'USD'));
-  console.log(await providers.DASHPoloniex(poloniexDashUrl));
-  console.log(await providers.DASHCryptoCompareAvg(averageUrl));
-  console.log(await providers.BitcoinAverageDashBtc(dash2btcUrl));
+  // wondering if maybe we don't run these seperately without 'await' we can run them async
+  const USD = await providers.BTCBitcoinAverage(btc2fiatUrl, vesUrl, ['USD'])
+  console.log(`BTC/USD: ${USD.USD}`)
+  console.log(`Poloniex: ${await providers.DASHPoloniex(poloniexDashUrl)}`)
+  console.log(`DASH Average: ${await providers.DASHCryptoCompareAvg(averageUrl)}`)
+  console.log(`BTC/DASH: ${await providers.BitcoinAverageDashBtc(dash2btcUrl)}`)
 
   console.log('Cache Refreshed');
 
@@ -50,8 +52,9 @@ app.get('/', function(req, res) {
   res.sendFile(__dirname + '/public/docs/index.html')
 })
 
-app.get('/loaderio-4d63e500c07b5d7d166e20c374e6534d', function(req, res) {
-  res.sendFile(__dirname + '/public/loaderio-4d63e500c07b5d7d166e20c374e6534d.txt')
+// verification token for loader.io testing - this is not necessary if running your own instance
+app.get('/loaderio-5c8ed429de43ac44e439a90752086c1d', function(req, res) {
+  res.sendFile(__dirname + '/public/loaderio-5c8ed429de43ac44e439a90752086c1d.txt')
 })
 
 // get CryptoCompare average trading price
@@ -118,4 +121,4 @@ app.get('/*', async function(req, res) {
 // set server
 const port = process.env.PORT || 3000;
 app.listen(port);
-console.log(`DashRates API v0.2.4 running on port http://localhost:${port}`);
+console.log(`DashRates API v0.2.5 running on port http://localhost:${port}`);

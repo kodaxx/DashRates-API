@@ -12,7 +12,7 @@ exports.BTCBitcoinAverage = function(url, vesUrl, [...currencies]) {
       // if the data is in cache, return that
       if (!!data) {
         resolve(JSON.parse(data))
-      } else {
+     } else {
         axios.get(url)
           .then(async result => {
             // for each currency passed into this function, we add a key/value to output (ex. USD: 6500.12345)
