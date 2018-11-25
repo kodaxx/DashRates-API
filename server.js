@@ -1,6 +1,8 @@
 const express = require('express')
 const app = express()
-const providers = require('./providers')
+const set = require('./providers')
+const get = require('./get')
+const cache = require('./cache')
 
 // set URLs
 const btc2fiatUrl = 'https://apiv2.bitcoinaverage.com/indices/global/ticker/short?crypto=BTC'
@@ -16,14 +18,25 @@ app.set('json spaces', 2)
 const CronJob = require('cron').CronJob;
 
 new CronJob('0 */1 * * * *', async function() {
-  // wondering if maybe we don't run these seperately without 'await' we can run them async
-  const USD = await providers.BTCBitcoinAverage(btc2fiatUrl, vesUrl, ['USD'])
-  console.log(`BTC/USD: ${USD.USD}`)
-  console.log(`Poloniex: ${await providers.DASHPoloniex(poloniexDashUrl)}`)
-  console.log(`DASH Average: ${await providers.DASHCryptoCompareAvg(averageUrl)}`)
-  console.log(`BTC/DASH: ${await providers.BitcoinAverageDashBtc(dash2btcUrl)}`)
+  currencies = ["AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS", "AUD", "AWG", "AZN", "BAM", "BBD", "BDT", "BGN",
+    "BHD", "BIF", "BMD", "BND", "BOB", "BRL", "BSD", "BTN", "BWP", "BYN", "BZD", "CAD", "CDF", "CHF", "CLF", "CLP",
+    "CNH", "CNY", "COP", "CRC", "CUC", "CUP", "CVE", "CZK", "DJF", "DKK", "DOP", "DZD", "EGP", "ERN", "ETB", "EUR",
+    "FJD", "FKP", "GBP", "GEL", "GGP", "GHS", "GIP", "GMD", "GNF", "GTQ", "GYD", "HKD", "HNL", "HRK", "HTG", "HUF",
+    "IDR", "ILS", "IMP", "INR", "IQD", "IRR", "ISK", "JEP", "JMD", "JOD", "JPY", "KES", "KGS", "KHR", "KMF", "KPW",
+    "KRW", "KWD", "KYD", "KZT", "LAK", "LBP", "LKR", "LRD", "LSL", "LYD", "MAD", "MDL", "MGA", "MKD", "MMK", "MNT",
+    "MOP", "MRO", "MUR", "MVR", "MWK", "MXN", "MYR", "MZN", "NAD", "NGN", "NIO", "NOK", "NPR", "NZD", "OMR", "PAB",
+    "PEN", "PGK", "PHP", "PKR", "PLN", "PYG", "QAR", "RON", "RSD", "RUB", "RWF", "SAR", "SBD", "SCR", "SDG", "SEK",
+    "SGD", "SHP", "SLL", "SOS", "SRD", "SSP", "STD", "SVC", "SYP", "SZL", "THB", "TJS", "TMT", "TND", "TOP", "TRY",
+    "TTD", "TWD", "TZS", "UAH", "UGX", "USD", "UYU", "UZS", "VES", "VND", "VUV", "WST", "XAF", "XAG", "XAU", "XCD",
+    "XDR", "XOF", "XPD", "XPF", "XPT", "YER", "ZAR", "ZMW", "ZWL"
+  ]
+  set.BTCCryptoCompareVes(vesUrl)
+  set.BTCBitcoinAverage(btc2fiatUrl, vesUrl, currencies)
+  set.DASHCryptoCompareAvg(averageUrl)
+  set.DASHPoloniex(poloniexDashUrl)
+  set.BitcoinAverageDashBtc(dash2btcUrl)
 
-  console.log('Cache Refreshed');
+  console.log('cache refreshed');
 
 }, null, true, 'America/Los_Angeles', null, true);
 
@@ -59,20 +72,56 @@ app.get('/loaderio-5c8ed429de43ac44e439a90752086c1d', function(req, res) {
 
 // get CryptoCompare average trading price
 app.get('/avg', async function(req, res) {
-  let price = await providers.DASHCryptoCompareAvg(averageUrl)
-  res.json(price)
+  const cacheRef = '_DASHCryptoCompareAvg'
+
+    cache.get(cacheRef, function(error, data) {
+      if (error) throw error
+      // if the data is in cache, return that
+      if (!!data) {
+        res.json(JSON.parse(data))
+        console.log('get _DASHCryptoCompareAvg')
+      } else {
+        console.log('_DASHCryptoCompareAvg empty')
+        res.status(400)
+        res.send('null')
+      }
+    })
 })
 
 // get Poloniex trading price
 app.get('/poloniex', async function(req, res) {
-  let price = await providers.DASHPoloniex(poloniexDashUrl)
-  res.json(price)
+  const cacheRef = '_DASHPoloniex'
+
+  cache.get(cacheRef, function(error, data) {
+    if (error) throw error
+    // if the data is in cache, return that
+    if (!!data) {
+      res.json(JSON.parse(data))
+      console.log('get _DASHPoloniex')
+    } else {
+      console.log('_DASHPoloniex empty')
+      res.status(400)
+      res.send('null')
+    }
+  })
 })
 
 // get BitcoinAverage trading price
 app.get('/btcaverage', async function(req, res) {
-  let price = await providers.BitcoinAverageDashBtc(dash2btcUrl)
-  res.json(price)
+  const cacheRef = '_bitcoinAverageDashBtc'
+
+  cache.get(cacheRef, function(error, data) {
+    if (error) throw error
+    // if the data is in cache, return that
+    if (!!data) {
+      res.json(JSON.parse(data))
+      console.log('get _bitcoinAverageDashBtc')
+    } else {
+      console.log('_bitcoinAverageDashBtc empty')
+      res.status(400)
+      res.send('null')
+    }
+  })
 })
 
 app.get('/invoice', async function(req, res) {
@@ -80,35 +129,21 @@ app.get('/invoice', async function(req, res) {
   const address = req.query.addr
   const amount = parseInt(req.query.amount)
 
-  res.json(await providers.invoice(address, amount))
+  res.json(await get.invoice(address, amount))
 })
 
 // get rates
 app.get('/*', async function(req, res) {
   const params = req.params[0].split('/')
   let currencies = params.map(currency => currency.toUpperCase())
-  // if we want all rates, we simply pass the 'list' parameter
-  if (currencies[0] === "LIST") {
-    currencies = ["AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS", "AUD", "AWG", "AZN", "BAM", "BBD", "BDT", "BGN",
-      "BHD", "BIF", "BMD", "BND", "BOB", "BRL", "BSD", "BTN", "BWP", "BYN", "BZD", "CAD", "CDF", "CHF", "CLF", "CLP",
-      "CNH", "CNY", "COP", "CRC", "CUC", "CUP", "CVE", "CZK", "DJF", "DKK", "DOP", "DZD", "EGP", "ERN", "ETB", "EUR",
-      "FJD", "FKP", "GBP", "GEL", "GGP", "GHS", "GIP", "GMD", "GNF", "GTQ", "GYD", "HKD", "HNL", "HRK", "HTG", "HUF",
-      "IDR", "ILS", "IMP", "INR", "IQD", "IRR", "ISK", "JEP", "JMD", "JOD", "JPY", "KES", "KGS", "KHR", "KMF", "KPW",
-      "KRW", "KWD", "KYD", "KZT", "LAK", "LBP", "LKR", "LRD", "LSL", "LYD", "MAD", "MDL", "MGA", "MKD", "MMK", "MNT",
-      "MOP", "MRO", "MUR", "MVR", "MWK", "MXN", "MYR", "MZN", "NAD", "NGN", "NIO", "NOK", "NPR", "NZD", "OMR", "PAB",
-      "PEN", "PGK", "PHP", "PKR", "PLN", "PYG", "QAR", "RON", "RSD", "RUB", "RWF", "SAR", "SBD", "SCR", "SDG", "SEK",
-      "SGD", "SHP", "SLL", "SOS", "SRD", "SSP", "STD", "SVC", "SYP", "SZL", "THB", "TJS", "TMT", "TND", "TOP", "TRY",
-      "TTD", "TWD", "TZS", "UAH", "UGX", "USD", "UYU", "UZS", "VES", "VND", "VUV", "WST", "XAF", "XAG", "XAU", "XCD",
-      "XDR", "XOF", "XPD", "XPF", "XPT", "YER", "ZAR", "ZMW", "ZWL"
-    ]
-  }
   console.log(`get rate: ${currencies}`)
+
   try {
     // get current average BTC/FIAT and BTC/DASH exchange rate
-    const rates = await providers.BTCBitcoinAverage(btc2fiatUrl, vesUrl, currencies)
-    const avg = await providers.DASHCryptoCompareAvg(averageUrl)
-    // const poloniex = await getPoloniexDash(poloniexDashUrl)
-    const dash = await providers.BitcoinAverageDashBtc(dash2btcUrl)
+    const rates = await get.BTCBitcoinAverage(currencies)
+    const avg = await get.DASHCryptoCompareAvg()
+    const dash = await get.BitcoinAverageDashBtc()
+
     // 'rates' is an object containing requested fiat rates (ex. USD: 6500)
     // multiply each value in the object by the current BTC/DASH rate
     for (var key in rates) {
@@ -129,4 +164,4 @@ app.get('/*', async function(req, res) {
 // set server
 const port = process.env.PORT || 3000;
 app.listen(port);
-console.log(`DashRates API v0.2.5 running on port http://localhost:${port}`);
+console.log(`DashRates API v0.2.6 running on port http://localhost:${port}`);
