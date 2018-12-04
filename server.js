@@ -82,7 +82,7 @@ app.get('/avg', async function(req, res) {
         console.log('get _DASHCryptoCompareAvg')
       } else {
         console.log('_DASHCryptoCompareAvg empty')
-        res.status(404)
+        res.status(400)
         res.send('null')
       }
     })
@@ -100,7 +100,7 @@ app.get('/poloniex', async function(req, res) {
       console.log('get _DASHPoloniex')
     } else {
       console.log('_DASHPoloniex empty')
-      res.status(404)
+      res.status(400)
       res.send('null')
     }
   })
@@ -118,7 +118,7 @@ app.get('/btcaverage', async function(req, res) {
       console.log('get _bitcoinAverageDashBtc')
     } else {
       console.log('_bitcoinAverageDashBtc empty')
-      res.status(404)
+      res.status(400)
       res.send('null')
     }
   })
