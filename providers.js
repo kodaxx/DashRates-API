@@ -2,7 +2,7 @@ const axios = require('axios')
 const cache = require('./cache')
 
 // get bitcoin's average price against various fiat currencies
-exports.BTCBitcoinAverage = function(url, vesUrl, [...currencies]) {
+exports.BTCBitcoinAverage = function(url, [...currencies]) {
   const output = {}
   const cacheRef = '_cachedBitcoinAverageFor_' + currencies
 
@@ -17,47 +17,12 @@ exports.BTCBitcoinAverage = function(url, vesUrl, [...currencies]) {
           .then(async result => {
             // for each currency passed into this function, we add a key/value to output (ex. USD: 6500.12345)
             for (var currency of currencies) {
-              // we check if the currency is 'VES', since the rates given on BitcoinAverage are incorrect
-              if (currency === 'VES') {
-                // instead we get rates from CryptoCompare
-                output[currency] = await exports.BTCCryptoCompareVes(vesUrl)
-              } else {
-                // otherwise we use the "last" price from bitcoinaverage to give us the most recent exchange rate
-                output[currency] = result.data[`BTC${currency}`].last
-              }
+              // use the "last" price from bitcoinaverage to give us the most recent exchange rate
+              output[currency] = result.data[`BTC${currency}`].last
             }
             // set the cache for this response and save for 60 seconds
             cache.setex(cacheRef, 60, JSON.stringify(output));
             // resolve an object containing all requested currencies
-            resolve(output)
-          })
-          .catch(error => {
-            console.log(`Error: ${error}`)
-            resolve(error)
-          })
-      }
-    })
-  })
-}
-
-// get bitcoin's average price against ves
-exports.BTCCryptoCompareVes = function(url) {
-  const cacheRef = '_cachedVES'
-  let output
-
-  return new Promise(resolve => {
-    cache.get(cacheRef, function(error, data) {
-      if (error) throw error
-      // if the data is in cache, return that
-      if (!!data) {
-        resolve(JSON.parse(data))
-      } else {
-        axios.get(url)
-          .then(result => {
-            // our output will equal the average since CryptoCompare returns the correct average
-            output = result.data.VES
-            // set the cache for this response and save for 30 seconds
-            cache.setex(cacheRef, 30, JSON.stringify(output));
             resolve(output)
           })
           .catch(error => {
