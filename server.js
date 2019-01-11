@@ -8,6 +8,7 @@ const dash2btcUrl = 'https://apiv2.bitcoinaverage.com/indices/crypto/ticker/DASH
 const poloniexDashUrl = 'https://poloniex.com/public?command=returnTradeHistory&currencyPair=BTC_DASH'
 const vesUrl = 'https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=VES'
 const averageUrl = 'https://min-api.cryptocompare.com/data/generateAvg?fsym=DASH&tsym=BTC&e=Binance,Kraken,Poloniex,Bitfinex'
+const dashCasaUrl = 'http://dash.casa/api/?cur=VES'
 
 // prettify json
 app.set('json spaces', 2)
@@ -108,13 +109,18 @@ app.get('/*', async function(req, res) {
     const rates = await providers.BTCBitcoinAverage(btc2fiatUrl, vesUrl, currencies)
     const avg = await providers.DASHCryptoCompareAvg(averageUrl)
     // const poloniex = await getPoloniexDash(poloniexDashUrl)
+    const dashVes = await providers.DashCasaVes(dashCasaUrl)
     const dash = await providers.BitcoinAverageDashBtc(dash2btcUrl)
     // 'rates' is an object containing requested fiat rates (ex. USD: 6500)
     // multiply each value in the object by the current BTC/DASH rate
     for (var key in rates) {
       if (rates.hasOwnProperty(key)) {
-        // rates[key] *= poloniex
-        rates[key] *= avg || dash
+        if (key === 'VES' && !!dashVes) {
+          rates[key] = dashVes
+        } else {
+          // rates[key] *= poloniex
+          rates[key] *= avg || dash
+        }
       }
     }
     // return the rates object
