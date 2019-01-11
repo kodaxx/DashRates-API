@@ -164,6 +164,33 @@ exports.BitcoinAverageDashBtc = function (url) {
   })
 }
 
+//get the current DASH/VES price from DashCasa API
+exports.DashCasaVes = function (url) {
+  const cacheRef = '_cachedDashCasaVes'
+
+  return new Promise(resolve => {
+    cache.get(cacheRef, function (error, data) {
+      if (error) throw error
+      // if the data is in cache, return that
+      if (!!data) {
+        resolve(JSON.parse(data))
+        console.log(`Grabbed _${$cacheRef}`)
+      } else {
+        axios.get(url)
+          .then(result => {
+            const dashVes = result.data.dashrate
+            // set the cache for this response and save for 60 seconds
+            cache.setex(cacheRef, 60, dashVes)
+            resolve(dashVes)
+          }).catch(error => {
+            console.log(`Error: ${error}`)
+            resolve(error)
+          })
+      }
+    })
+  })
+}
+
 // get invoice number from CoinText
 exports.invoice = function(address, amount) {
   return new Promise(resolve => {
