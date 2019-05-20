@@ -6,6 +6,11 @@ const cache = require('express-redis-cache')({ expire: { 200: 60, 404: 1, xxx: 1
 const get = require('./get')
 const list = require('./list')
 
+setInterval(function(){
+  axios.get('/avg', { proxy: { host: 'localhost', port: 3000 } })
+  axios.get('list', { proxy: { host: 'localhost', port: 3000 } })
+}, 60000)
+
 // log cache messages to console
 cache.on('message', function(message){
   console.log("cache", message);
@@ -54,7 +59,7 @@ const btc2dashAverageUrl = 'https://min-api.cryptocompare.com/data/generateAvg?f
 const vesUrl = 'https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=VES'
 
 // returns dash's average dash/btc price
-app.get('/avg', cache.route(), async function (req, res) {
+app.get('/avg', cache.route('average'), async function (req, res) {
   try {
     let dash = await get.dashAverage(btc2dashAverageUrl)
     res.json(dash)
@@ -95,6 +100,6 @@ app.get('/*', cache.route(), async function(req, res) {
   }
 })
 
-var port = process.env.PORT || 3000
+let port = process.env.PORT || 3000
 app.listen(port)
 console.log(`DashRates API v0.3.5 running on port http://localhost:${port}`)
