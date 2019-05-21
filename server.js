@@ -6,8 +6,8 @@ const providers = require('./providers')
 const btc2fiatUrl = 'https://apiv2.bitcoinaverage.com/indices/global/ticker/short?crypto=BTC'
 const dash2btcUrl = 'https://apiv2.bitcoinaverage.com/indices/crypto/ticker/DASHBTC'
 const poloniexDashUrl = 'https://poloniex.com/public?command=returnTradeHistory&currencyPair=BTC_DASH'
-const vesUrl = 'https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=VES'
 const averageUrl = 'https://min-api.cryptocompare.com/data/generateAvg?fsym=DASH&tsym=BTC&e=Binance,Kraken,Poloniex,Bitfinex'
+const dashCasaUrl = 'http://dash.casa/api/?cur=VES'
 
 // prettify json
 app.set('json spaces', 2)
@@ -17,7 +17,7 @@ const CronJob = require('cron').CronJob;
 
 new CronJob('0 */1 * * * *', async function() {
   // wondering if maybe we don't run these seperately without 'await' we can run them async
-  const USD = await providers.BTCBitcoinAverage(btc2fiatUrl, vesUrl, ['USD'])
+  const USD = await providers.BTCBitcoinAverage(btc2fiatUrl, ['USD'])
   console.log(`BTC/USD: ${USD.USD}`)
   console.log(`Poloniex: ${await providers.DASHPoloniex(poloniexDashUrl)}`)
   console.log(`DASH Average: ${await providers.DASHCryptoCompareAvg(averageUrl)}`)
@@ -113,16 +113,21 @@ app.get('/*', async function(req, res) {
   console.log(`get rate: ${currencies}`)
   try {
     // get current average BTC/FIAT and BTC/DASH exchange rate
-    const rates = await providers.BTCBitcoinAverage(btc2fiatUrl, vesUrl, currencies)
+    const rates = await providers.BTCBitcoinAverage(btc2fiatUrl, currencies)
     const avg = await providers.DASHCryptoCompareAvg(averageUrl)
     // const poloniex = await getPoloniexDash(poloniexDashUrl)
+    const dashVes = await providers.DashCasaVes(dashCasaUrl)
     const dash = await providers.BitcoinAverageDashBtc(dash2btcUrl)
     // 'rates' is an object containing requested fiat rates (ex. USD: 6500)
     // multiply each value in the object by the current BTC/DASH rate
     for (var key in rates) {
       if (rates.hasOwnProperty(key)) {
-        // rates[key] *= poloniex
-        rates[key] *= avg || dash
+        if (key === 'VES' && !!dashVes) {
+          rates[key] = dashVes
+        } else {
+          // rates[key] *= poloniex
+          rates[key] *= avg || dash
+        }
       }
     }
     // return the rates object
