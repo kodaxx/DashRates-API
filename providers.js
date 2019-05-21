@@ -139,7 +139,7 @@ exports.DashCasaVes = function (url) {
       // if the data is in cache, return that
       if (!!data) {
         resolve(JSON.parse(data))
-        console.log(`Grabbed _${$cacheRef}`)
+        console.log(`Grabbed _${cacheRef}`)
       } else {
         axios.get(url)
           .then(result => {
