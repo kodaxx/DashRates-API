@@ -187,8 +187,34 @@ exports.invoice = function(address, amount) {
         resolve(res.data.paymentId)
       })
       .catch((err) => {
-        console.log(error)
-        resolve(error)
+        console.log(err)
+        resolve(err)
+      })
+  })
+}
+
+// get invoice number from DashText
+exports.dashText = function(address, amount) {
+  return new Promise(resolve => {
+
+    const token = process.env.DASH_TEXT
+    const data = `address=${address}&amount=${amount}&token=${token}`
+
+    const headers = {
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    }
+
+    axios.post('https://api.dashtext.io/apibuy.php', data)
+      .then((res) => {
+        console.log(res.data)
+        resolve(res.data.code)
+      })
+      .catch((err) => {
+        console.log(err)
+        resolve(err)
       })
   })
 }
