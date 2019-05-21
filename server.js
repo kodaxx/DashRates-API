@@ -142,4 +142,4 @@ app.get('/*', async function(req, res) {
 // set server
 const port = process.env.PORT || 3000;
 app.listen(port);
-console.log(`DashRates API v0.2.5 running on port http://localhost:${port}`);
+console.log(`DashRates API v0.2.6 running on port http://localhost:${port}`);
