@@ -3,8 +3,8 @@ const app = express()
 const providers = require('./providers')
 
 // set URLs
-const btc2fiatUrl = 'https://apiv2.bitcoinaverage.com/indices/global/ticker/short?crypto=BTC'
-const dash2btcUrl = 'https://apiv2.bitcoinaverage.com/indices/crypto/ticker/DASHBTC'
+const btc2fiatUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin'
+const dash2btcUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=dash&vs_currencies=btc'
 const poloniexDashUrl = 'https://poloniex.com/public?command=returnTradeHistory&currencyPair=BTC_DASH'
 const averageUrl = 'https://min-api.cryptocompare.com/data/generateAvg?fsym=DASH&tsym=BTC&e=Binance,Kraken,Poloniex,Bitfinex'
 const dashCasaUrl = 'http://dash.casa/api/?cur=VES'

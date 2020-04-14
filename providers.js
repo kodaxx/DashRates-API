@@ -13,12 +13,12 @@ exports.BTCBitcoinAverage = function(url, [...currencies]) {
       if (!!data) {
         resolve(JSON.parse(data))
      } else {
-        axios.get(url)
+        axios.get(url + '&vs_currencies=' + currencies.join())
           .then(async result => {
             // for each currency passed into this function, we add a key/value to output (ex. USD: 6500.12345)
             for (var currency of currencies) {
               // use the "last" price from bitcoinaverage to give us the most recent exchange rate
-              output[currency] = result.data[`BTC${currency}`].last
+              output[currency] = result.data['bitcoin'][currency.toLowerCase()]
             }
             // set the cache for this response and save for 60 seconds
             cache.setex(cacheRef, 60, JSON.stringify(output));
@@ -115,7 +115,7 @@ exports.BitcoinAverageDashBtc = function (url) {
       } else {
         axios.get(url)
           .then(result => {
-            const last = result.data.last
+            const last = result.data['dash']['btc']
             // set the cache for this response and save for 60 seconds
             cache.setex(cacheRef, 60, JSON.stringify(last))
             resolve(last)
