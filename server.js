@@ -7,7 +7,7 @@ const btc2fiatUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin'
 const dash2btcUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=dash&vs_currencies=btc'
 const poloniexDashUrl = 'https://poloniex.com/public?command=returnTradeHistory&currencyPair=BTC_DASH'
 const averageUrl = 'https://min-api.cryptocompare.com/data/generateAvg?fsym=DASH&tsym=BTC&e=Binance,Kraken,Poloniex,Bitfinex'
-const dashLocalBitcoinsUrl = 'https://localbitcoins.com/bitcoinaverage/ticker-all-currencies'
+const btcLocalBitcoinsUrl = 'https://localbitcoins.com/bitcoinaverage/ticker-all-currencies'
 
 // prettify json
 app.set('json spaces', 2)
@@ -22,6 +22,7 @@ new CronJob('0 */1 * * * *', async function() {
   console.log(`Poloniex: ${await providers.DASHPoloniex(poloniexDashUrl)}`)
   console.log(`DASH Average: ${await providers.DASHCryptoCompareAvg(averageUrl)}`)
   console.log(`BTC/DASH: ${await providers.CoingeckoDashBtc(dash2btcUrl)}`)
+  console.log(`BTC/VES: ${await providers.BTCLocalBitcoinsVes(btcLocalBitcoinsUrl)}`)
 
   console.log('Cache Refreshed');
 
@@ -116,18 +117,17 @@ app.get('/*', async function(req, res) {
     const rates = await providers.BTCCoingecko(btc2fiatUrl, currencies)
     const avg = await providers.DASHCryptoCompareAvg(averageUrl)
     // const poloniex = await getPoloniexDash(poloniexDashUrl)
-    const dashVes = await providers.DashLocalBitcoinsVes(dashLocalBitcoinsUrl)
+    const btcVes = await providers.BTCLocalBitcoinsVes(btcLocalBitcoinsUrl)
     const dash = await providers.CoingeckoDashBtc(dash2btcUrl)
+    if (currencies.includes('VES') && !!btcVes) {
+      rates['VES'] = btcVes
+    }
     // 'rates' is an object containing requested fiat rates (ex. USD: 6500)
     // multiply each value in the object by the current BTC/DASH rate
     for (var key in rates) {
       if (rates.hasOwnProperty(key)) {
-        if (key === 'VES' && !!dashVes) {
-          rates[key] = dashVes
-        } else {
-          // rates[key] *= poloniex
-          rates[key] *= avg || dash
-        }
+        // rates[key] *= poloniex
+        rates[key] *= avg || dash
       }
     }
     // return the rates object

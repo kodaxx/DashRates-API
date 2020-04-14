@@ -129,8 +129,8 @@ exports.CoingeckoDashBtc = function (url) {
   })
 }
 
-//get the current DASH/VES price from DashCasa API
-exports.DashLocalBitcoinsVes = function (url) {
+//get the current BTC/VES price from LocalBitcoins API
+exports.BTCLocalBitcoinsVes = function (url) {
   const cacheRef = '_cachedDashLocalBitcoinsVes'
 
   return new Promise(resolve => {
@@ -143,10 +143,10 @@ exports.DashLocalBitcoinsVes = function (url) {
       } else {
         axios.get(url)
           .then(result => {
-            const dashVes = parseFloat(result.data['VES']['rates']['last'])
+            const btcVes = parseFloat(result.data['VES']['rates']['last'])
             // set the cache for this response and save for 60 seconds
-            cache.setex(cacheRef, 60, dashVes)
-            resolve(dashVes)
+            cache.setex(cacheRef, 60, btcVes)
+            resolve(btcVes)
           }).catch(error => {
             console.log(`Error: ${error}`)
             resolve(error)
