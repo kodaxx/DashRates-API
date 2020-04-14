@@ -69,8 +69,8 @@ app.get('/poloniex', async function(req, res) {
   res.json(price)
 })
 
-// get BitcoinAverage trading price
-app.get('/btcaverage', async function(req, res) {
+// get Coingecko trading price
+app.get('/coingecko', async function(req, res) {
   let price = await providers.CoingeckoDashBtc(dash2btcUrl)
   res.json(price)
 })

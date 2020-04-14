@@ -4,7 +4,7 @@ const cache = require('./cache')
 // get bitcoin's average price against various fiat currencies
 exports.BTCCoingecko = function(url, [...currencies]) {
   const output = {}
-  const cacheRef = '_cachedBitcoinAverageFor_' + currencies
+  const cacheRef = '_cachedCoingeckoFor_' + currencies
 
   return new Promise(resolve => {
     cache.get(cacheRef, function(error, data) {
@@ -143,7 +143,7 @@ exports.DashLocalBitcoinsVes = function (url) {
       } else {
         axios.get(url)
           .then(result => {
-            const dashVes = result.data['VES']['rates']['last']
+            const dashVes = parseFloat(result.data['VES']['rates']['last'])
             // set the cache for this response and save for 60 seconds
             cache.setex(cacheRef, 60, dashVes)
             resolve(dashVes)
