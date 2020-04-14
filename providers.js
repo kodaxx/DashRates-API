@@ -2,7 +2,7 @@ const axios = require('axios')
 const cache = require('./cache')
 
 // get bitcoin's average price against various fiat currencies
-exports.BTCBitcoinAverage = function(url, [...currencies]) {
+exports.BTCCoingecko = function(url, [...currencies]) {
   const output = {}
   const cacheRef = '_cachedBitcoinAverageFor_' + currencies
 
@@ -102,7 +102,7 @@ exports.DASHPoloniex = function(url) {
 }
 
 // get the current BTC/DASH price - we grab the "last" price from bitcoinaverage to get the most recent exchange rate
-exports.BitcoinAverageDashBtc = function (url) {
+exports.CoingeckoDashBtc = function (url) {
   const cacheRef = '_cachedDashBTC'
 
   return new Promise(resolve => {
@@ -130,8 +130,8 @@ exports.BitcoinAverageDashBtc = function (url) {
 }
 
 //get the current DASH/VES price from DashCasa API
-exports.DashCasaVes = function (url) {
-  const cacheRef = '_cachedDashCasaVes'
+exports.DashLocalBitcoinsVes = function (url) {
+  const cacheRef = '_cachedDashLocalBitcoinsVes'
 
   return new Promise(resolve => {
     cache.get(cacheRef, function (error, data) {
@@ -143,7 +143,7 @@ exports.DashCasaVes = function (url) {
       } else {
         axios.get(url)
           .then(result => {
-            const dashVes = result.data.dashrate
+            const dashVes = result.data['VES']['rates']['last']
             // set the cache for this response and save for 60 seconds
             cache.setex(cacheRef, 60, dashVes)
             resolve(dashVes)
