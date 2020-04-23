@@ -109,7 +109,7 @@ This is the average DASH price across Binance, Kraken, Poloniex, and Bitfinex
 
 - #### Response
     ```js
-    0.024089169894995932
+    0.024089169894995931
     ```
 This is an average of the price paid for the last 200 trades on Poloniex
 
