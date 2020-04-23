@@ -3,11 +3,11 @@ const app = express()
 const providers = require('./providers')
 
 // set URLs
-const btc2fiatUrl = 'https://apiv2.bitcoinaverage.com/indices/global/ticker/short?crypto=BTC'
-const dash2btcUrl = 'https://apiv2.bitcoinaverage.com/indices/crypto/ticker/DASHBTC'
+const btc2fiatUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin'
+const dash2btcUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=dash&vs_currencies=btc'
 const poloniexDashUrl = 'https://poloniex.com/public?command=returnTradeHistory&currencyPair=BTC_DASH'
 const averageUrl = 'https://min-api.cryptocompare.com/data/generateAvg?fsym=DASH&tsym=BTC&e=Binance,Kraken,Poloniex,Bitfinex'
-const dashCasaUrl = 'http://dash.casa/api/?cur=VES'
+const btcLocalBitcoinsUrl = 'https://localbitcoins.com/bitcoinaverage/ticker-all-currencies'
 
 // prettify json
 app.set('json spaces', 2)
@@ -17,11 +17,12 @@ const CronJob = require('cron').CronJob;
 
 new CronJob('0 */1 * * * *', async function() {
   // wondering if maybe we don't run these seperately without 'await' we can run them async
-  const USD = await providers.BTCBitcoinAverage(btc2fiatUrl, ['USD'])
+  const USD = await providers.BTCCoingecko(btc2fiatUrl, ['USD'])
   console.log(`BTC/USD: ${USD.USD}`)
   console.log(`Poloniex: ${await providers.DASHPoloniex(poloniexDashUrl)}`)
   console.log(`DASH Average: ${await providers.DASHCryptoCompareAvg(averageUrl)}`)
-  console.log(`BTC/DASH: ${await providers.BitcoinAverageDashBtc(dash2btcUrl)}`)
+  console.log(`BTC/DASH: ${await providers.CoingeckoDashBtc(dash2btcUrl)}`)
+  console.log(`BTC/VES: ${await providers.BTCLocalBitcoinsVes(btcLocalBitcoinsUrl)}`)
 
   console.log('Cache Refreshed');
 
@@ -69,9 +70,9 @@ app.get('/poloniex', async function(req, res) {
   res.json(price)
 })
 
-// get BitcoinAverage trading price
-app.get('/btcaverage', async function(req, res) {
-  let price = await providers.BitcoinAverageDashBtc(dash2btcUrl)
+// get Coingecko trading price
+app.get('/coingecko', async function(req, res) {
+  let price = await providers.CoingeckoDashBtc(dash2btcUrl)
   res.json(price)
 })
 
@@ -113,21 +114,20 @@ app.get('/*', async function(req, res) {
   console.log(`get rate: ${currencies}`)
   try {
     // get current average BTC/FIAT and BTC/DASH exchange rate
-    const rates = await providers.BTCBitcoinAverage(btc2fiatUrl, currencies)
+    const rates = await providers.BTCCoingecko(btc2fiatUrl, currencies)
     const avg = await providers.DASHCryptoCompareAvg(averageUrl)
     // const poloniex = await getPoloniexDash(poloniexDashUrl)
-    const dashVes = await providers.DashCasaVes(dashCasaUrl)
-    const dash = await providers.BitcoinAverageDashBtc(dash2btcUrl)
+    const btcVes = await providers.BTCLocalBitcoinsVes(btcLocalBitcoinsUrl)
+    const dash = await providers.CoingeckoDashBtc(dash2btcUrl)
+    if (currencies.includes('VES') && !!btcVes) {
+      rates['VES'] = btcVes
+    }
     // 'rates' is an object containing requested fiat rates (ex. USD: 6500)
     // multiply each value in the object by the current BTC/DASH rate
     for (var key in rates) {
       if (rates.hasOwnProperty(key)) {
-        if (key === 'VES' && !!dashVes) {
-          rates[key] = dashVes
-        } else {
-          // rates[key] *= poloniex
-          rates[key] *= avg || dash
-        }
+        // rates[key] *= poloniex
+        rates[key] *= avg || dash
       }
     }
     // return the rates object

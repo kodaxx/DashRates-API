@@ -88,12 +88,12 @@ There are currently 167 supported exchange rates.
     ```
 This is the average DASH price across Binance, Kraken, Poloniex, and Bitfinex
 
-### Get BitcoinAverage DASH trading price
+### Get Coingecko DASH trading price
 
 - #### Endpoint
-    `https://host.com/btcaverage`
+    `https://host.com/coingecko`
     #### Example:
-    `https://api.get-spark.com/btcaverage`
+    `https://api.get-spark.com/coingecko`
 
 - #### Response
     ```js
